@@ -127,13 +127,15 @@ use self::glob::{glob, Paths};
 use quote::quote;
 use std::path::{Path, PathBuf};
 use syn::parse::{Parse, ParseStream, Result};
-use syn::{parse_macro_input, Expr, ExprLit, Ident, Lit, Token, ItemFn};
+use syn::{parse_macro_input, Expr, ExprLit, Ident, ItemFn, Lit, Token};
 
 // Form canonical name without any punctuation/delimiter or special character
 fn canonical_fn_name(s: &str) -> String {
     // remove delimiters and special characters
     s.replace(
-        &['"', ' ', '.', ':', '-', '*', '/', '\\', '\n', '\t', '\r', '+'][..],
+        &[
+            '"', ' ', '.', ':', '-', '*', '/', '\\', '\n', '\t', '\r', '+',
+        ][..],
         "_",
     )
 }
@@ -156,13 +158,11 @@ struct MacroAttributes {
 impl Parse for MacroAttributes {
     fn parse(input: ParseStream) -> Result<Self> {
         let glob_pattern: Lit = input.parse()?;
-        if ! input.is_empty() {
+        if !input.is_empty() {
             panic!("found multiple parameters, expected one");
         }
 
-        Ok(MacroAttributes {
-            glob_pattern,
-        })
+        Ok(MacroAttributes { glob_pattern })
     }
 }
 
@@ -239,8 +239,7 @@ pub fn test_resources(attrs: TokenStream, func: TokenStream) -> TokenStream {
 
     let func_copy: proc_macro2::TokenStream = func.clone().into();
 
-    let func_ast: ItemFn = syn::parse(func)
-        .expect("failed to parse tokens as a function");
+    let func_ast: ItemFn = syn::parse(func).expect("failed to parse tokens as a function");
 
     let func_ident = func_ast.ident;
 
@@ -367,8 +366,7 @@ pub fn bench_resources(attrs: TokenStream, func: TokenStream) -> TokenStream {
 
     let func_copy: proc_macro2::TokenStream = func.clone().into();
 
-    let func_ast: ItemFn = syn::parse(func)
-        .expect("failed to parse tokens as a function");
+    let func_ast: ItemFn = syn::parse(func).expect("failed to parse tokens as a function");
 
     let func_ident = func_ast.ident;
 
@@ -419,7 +417,6 @@ pub fn bench_resources(attrs: TokenStream, func: TokenStream) -> TokenStream {
     // transforming proc_macro2::TokenStream into proc_macro::TokenStream
     result.1.into()
 }
-
 
 /// **Experimental** Helper function encapsulating and unwinding each phase, namely setup, test and teardown
 //fn run_utest<U, T, D, C>(setup: U, test: T, teardown: D) -> ()
@@ -518,7 +515,6 @@ fn concat_ts(
 ) -> proc_macro2::TokenStream {
     quote! { #accu #other }
 }
-
 
 /// Parser elements
 struct GlobExpand {
@@ -732,12 +728,7 @@ pub fn glob_expand(item: TokenStream) -> TokenStream {
                 .expect("bad encoding");
 
             // remove delimiters and special characters
-            let canonical_name = path_as_str
-                .replace("\"", " ")
-                .replace(" ", "_")
-                .replace("-", "_")
-                .replace("*", "_")
-                .replace("/", "_");
+            let canonical_name = canonical_fn_name(&path_as_str);
 
             // form an identifier with prefix
             let mut func_name = PREFIX.to_string();
