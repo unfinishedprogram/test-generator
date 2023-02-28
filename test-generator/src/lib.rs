@@ -138,6 +138,7 @@ fn canonical_fn_name(s: &str) -> String {
         ][..],
         "_",
     )
+    .replace('+', "_")
 }
 
 /// Return the concatenation of two token-streams
@@ -355,12 +356,12 @@ pub fn bench_resources(attrs: TokenStream, func: TokenStream) -> TokenStream {
 
     let unqualified_pattern = match glob_pattern {
         Lit::Str(l) => l.value(),
-        Lit::Bool(l) => panic!(format!("expected string parameter, got '{}'", &l.value)),
-        Lit::Byte(l) => panic!(format!("expected string parameter, got '{}'", &l.value())),
+        Lit::Bool(l) => panic!("expected string parameter, got '{}'", &l.value),
+        Lit::Byte(l) => panic!("expected string parameter, got '{}'", &l.value()),
         Lit::ByteStr(_) => panic!("expected string parameter, got byte-string"),
-        Lit::Char(l) => panic!(format!("expected string parameter, got '{}'", &l.value())),
-        Lit::Int(l) => panic!(format!("expected string parameter, got '{}'", &l.value())),
-        Lit::Float(l) => panic!(format!("expected string parameter, got '{}'", &l.value())),
+        Lit::Char(l) => panic!("expected string parameter, got '{}'", &l.value()),
+        Lit::Int(l) => panic!("expected string parameter, got '{}'", &l.value()),
+        Lit::Float(l) => panic!("expected string parameter, got '{}'", &l.value()),
         _ => panic!("expected string parameter"),
     };
 
@@ -648,7 +649,7 @@ fn expr_stringified(expr: &Expr, int_as_hex: bool) -> String {
         Expr::Reference(ref reference) => {
             let ref_expr = &reference.expr;
 
-            expr_stringified(&ref_expr, int_as_hex)
+            expr_stringified(ref_expr, int_as_hex)
         }
         _ => panic!(),
     };
@@ -729,6 +730,7 @@ pub fn glob_expand(item: TokenStream) -> TokenStream {
 
             // remove delimiters and special characters
             let canonical_name = canonical_fn_name(&path_as_str);
+            println!("{canonical_name}");
 
             // form an identifier with prefix
             let mut func_name = PREFIX.to_string();
